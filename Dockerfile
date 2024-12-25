@@ -26,11 +26,6 @@ RUN wget https://releases.hashicorp.com/terraform/1.0.0/terraform_1.0.0_linux_am
 # Verify installation
 RUN terraform -v
 
-
-#Copying aws_login.sh
-COPY scripts/* /
-RUN chmod +x /*.sh
-
 # Set working directory
 WORKDIR /workspace
 
