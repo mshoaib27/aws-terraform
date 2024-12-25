@@ -112,13 +112,16 @@ pipelines:
             - export AWS_WEB_IDENTITY_TOKEN_FILE=$(pwd)/web-identity-token
             - echo $BITBUCKET_STEP_OIDC_TOKEN > $AWS_WEB_IDENTITY_TOKEN_FILE
             - terraform init -backend-config="bucket=$TF_BACKEND_BUCKET" -backend-config="region=$AWS_DEFAULT_REGION"
-            - terraform plan -var-file="dev.tfvars" -out=tfplan
+            - terraform plan -var-file="dev.tfvars" -out=tfplan -detailed-exitcode
             - |
-              if [ $? -eq 2 ]; then
+              if [ $? -eq 0 ]; then
+                echo "No changes detected, skipping apply."
+              elif [ $? -eq 2 ]; then
                 echo "Changes detected, applying..."
                 terraform apply -var-file="dev.tfvars" -auto-approve
               else
-                echo "No changes detected, skipping apply."
+                echo "Error during plan. Exiting."
+                exit 1
               fi
 
     Staging:
