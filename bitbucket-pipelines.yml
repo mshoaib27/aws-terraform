@@ -79,6 +79,10 @@ definitions:
         name: Check Terraform Plan
         <<: *terraform_common_steps
         script:
+          - export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
+          - export AWS_ROLE_ARN=$AWS_OIDC_ROLE_ARN
+          - export AWS_WEB_IDENTITY_TOKEN_FILE=$(pwd)/web-identity-token
+          - echo $BITBUCKET_STEP_OIDC_TOKEN > $AWS_WEB_IDENTITY_TOKEN_FILE
           - terraform init -backend-config="bucket=$TF_BACKEND_BUCKET" -backend-config="region=$AWS_DEFAULT_REGION"
           - terraform plan -var-file="dev.tfvars" -detailed-exitcode || exit 0 # exit 0 means no changes, 2 means changes are detected
 
@@ -103,6 +107,11 @@ pipelines:
           name: Apply or Destroy Terraform
           <<: *terraform_common_steps
           script:
+            - export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
+            - export AWS_ROLE_ARN=$AWS_OIDC_ROLE_ARN
+            - export AWS_WEB_IDENTITY_TOKEN_FILE=$(pwd)/web-identity-token
+            - echo $BITBUCKET_STEP_OIDC_TOKEN > $AWS_WEB_IDENTITY_TOKEN_FILE
+            - terraform init -backend-config="bucket=$TF_BACKEND_BUCKET" -backend-config="region
             - terraform plan -var-file="dev.tfvars" -detailed-exitcode
             - |
               if [ $? -eq 2 ]; then
