@@ -22,6 +22,17 @@ definitions:
           - export ECR_URL="739275445379.dkr.ecr.sa-east-1.amazonaws.com/terraform/image"
           - aws ecr get-login-password --region "$AWS_DEFAULT_REGION" | docker login --username AWS --password-stdin 739275445379.dkr.ecr.sa-east-1.amazonaws.com
 
+          # Check if image exists in ECR
+          - export IMAGE_TAG="latest"
+          - export IMAGE_EXISTS=$(aws ecr describe-images --repository-name terraform/image --image-ids imageTag=$IMAGE_TAG --region $AWS_DEFAULT_REGION --query 'imageDetails[0]' || echo "null")
+          - |
+            if [ "$IMAGE_EXISTS" != "null" ]; then
+              echo "Image $ECR_URL:$IMAGE_TAG already exists. Skipping Docker build and push."
+              exit 0
+            else
+              echo "Image does not exist. Proceeding with Docker build and push."
+            fi          
+
           - docker build -t terraform/terraform-image .
           - docker tag terraform/terraform-image:latest $ECR_URL:latest
           - docker push $ECR_URL:latest
@@ -112,7 +123,7 @@ pipelines:
             - export AWS_WEB_IDENTITY_TOKEN_FILE=$(pwd)/web-identity-token
             - echo $BITBUCKET_STEP_OIDC_TOKEN > $AWS_WEB_IDENTITY_TOKEN_FILE
             - terraform init -backend-config="bucket=$TF_BACKEND_BUCKET" -backend-config="region=$AWS_DEFAULT_REGION"
-            - terraform plan -var-file="dev.tfvars" -out=tfplan -detailed-exitcode || exit 0 # exit 0 means no changes, 2 means changes are detected
+            - terraform plan -var-file="dev.tfvars" -out=tfplan
             - |
               if [ $? -eq 0 ]; then
                 echo "No changes detected, skipping apply."
