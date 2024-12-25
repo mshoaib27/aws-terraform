@@ -124,6 +124,7 @@ pipelines:
             - echo $BITBUCKET_STEP_OIDC_TOKEN > $AWS_WEB_IDENTITY_TOKEN_FILE
             - terraform init -backend-config="bucket=$TF_BACKEND_BUCKET" -backend-config="region=$AWS_DEFAULT_REGION"
             - terraform plan -var-file="dev.tfvars" -out=tfplan
+            - PLAN_EXIT_CODE=$?
             - |
               if [ $? -eq 2 ]; then
                 echo "Changes detected in the plan. Applying changes..."
