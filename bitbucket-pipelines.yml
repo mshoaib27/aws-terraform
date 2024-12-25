@@ -1,0 +1,101 @@
+image: atlassian/default-image:4
+
+definitions:
+  steps:
+    - step: &docker_build_and_push_ecr
+        oidc: true
+        name: Build and Push Docker Image to ECR
+        image: docker:20.10.7
+        services:
+          - docker
+        script:
+          - apk add --no-cache python3 py3-pip jq curl
+          - pip3 install awscli
+
+          # Set up AWS OIDC role
+          - export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
+          - export AWS_ROLE_ARN=$AWS_OIDC_ROLE_ARN
+          - export AWS_WEB_IDENTITY_TOKEN_FILE=$(pwd)/web-identity-token
+          - echo $BITBUCKET_STEP_OIDC_TOKEN > $AWS_WEB_IDENTITY_TOKEN_FILE
+
+          # Log in to Amazon ECR
+          - export ECR_URL="739275445379.dkr.ecr.sa-east-1.amazonaws.com/terraform/image"
+          - aws ecr get-login-password --region "$AWS_DEFAULT_REGION" | docker login --username AWS --password-stdin 739275445379.dkr.ecr.sa-east-1.amazonaws.com
+
+          - docker build -t terraform/terraform-image .
+          - docker tag terraform/terraform-image:latest $ECR_URL:latest
+          - docker push $ECR_URL:latest
+
+
+    - step: &terraform_common_steps
+        name: Terraform Setup & Execution
+        oidc: true
+        image:
+          name: "739275445379.dkr.ecr.sa-east-1.amazonaws.com/terraform/image:latest"
+        aws:
+          region: $AWS_DEFAULT_REGION
+          oidc-role: $AWS_OIDC_ROLE_ARN
+        script:
+          - apk add --no-cache python3 py3-pip jq curl
+          - pip3 install awscli
+          - export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
+          - export AWS_ROLE_ARN=$AWS_OIDC_ROLE_ARN
+          - export AWS_WEB_IDENTITY_TOKEN_FILE=$(pwd)/web-identity-token
+          - echo $BITBUCKET_STEP_OIDC_TOKEN > $AWS_WEB_IDENTITY_TOKEN_FILE
+          - terraform --version
+
+
+    - step: &terraform_init
+        name: Terraform Init
+        <<: *terraform_common_steps
+        script:
+          - terraform init -backend-config="bucket=$TF_BACKEND_BUCKET"  -backend-config="region=$AWS_DEFAULT_REGION"
+
+    - step: &terraform_apply
+        name: Terraform Apply
+        <<: *terraform_common_steps
+        script:
+          - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+          - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+          - terraform init -backend-config="bucket=$TF_BACKEND_BUCKET"  -backend-config="region=$AWS_DEFAULT_REGION"
+          - terraform plan -var-file="dev.tfvars"
+          - terraform apply -var-file="dev.tfvars" -auto-approve
+
+    - step: &terraform_destroy
+        name: Terraform Destroy
+        <<: *terraform_common_steps
+        script:
+          - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+          - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+          - terraform init -backend-config="bucket=$TF_BACKEND_BUCKET" -backend-config="region=$AWS_DEFAULT_REGION"
+          - terraform plan -destroy -var-file="dev.tfvars"
+          - terraform destroy -var-file="dev.tfvars" -auto-approve
+
+pipelines:
+  branches:
+    main:
+      - step: *docker_build_and_push_ecr
+      - step: *terraform_init
+      - step: *terraform_apply
+
+  pull-requests:
+    '**':
+      - step: *docker_build_and_push_ecr
+      - step: *terraform_init
+
+  custom:
+    Development:
+      - step: *docker_build_and_push_ecr
+      - step: *terraform_init
+      - step: *terraform_apply
+      - step: *terraform_destroy
+
+    Staging:
+      - step: *docker_build_and_push_ecr
+      - step: *terraform_init
+      - step: *terraform_apply
+
+    Production:
+      - step: *docker_build_and_push_ecr
+      - step: *terraform_init
+      - step: *terraform_apply

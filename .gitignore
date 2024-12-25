@@ -25,6 +25,8 @@ dist/
 
 # JetBrains IDE
 .idea/
+.terraform/
+.terraform.lock.hcl
 
 # Unit test reports
 TEST*.xml
