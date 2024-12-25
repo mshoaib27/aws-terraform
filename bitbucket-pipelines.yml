@@ -75,6 +75,13 @@ definitions:
           - terraform plan -destroy -var-file="dev.tfvars"
           - terraform destroy -var-file="dev.tfvars" -auto-approve
 
+    - step: &terraform_plan_check
+        name: Check Terraform Plan
+        <<: *terraform_common_steps
+        script:
+          - terraform init -backend-config="bucket=$TF_BACKEND_BUCKET" -backend-config="region=$AWS_DEFAULT_REGION"
+          - terraform plan -var-file="dev.tfvars" -detailed-exitcode || exit 0 # exit 0 means no changes, 2 means changes are detected
+
 pipelines:
   branches:
     main:
@@ -91,8 +98,19 @@ pipelines:
     Development:
       - step: *docker_build_and_push_ecr
       - step: *terraform_init
-      - step: *terraform_apply
-      - step: *terraform_destroy
+      - step: *terraform_plan_check
+      - step:
+          name: Apply or Destroy Terraform
+          <<: *terraform_common_steps
+          script:
+            - terraform plan -var-file="dev.tfvars" -detailed-exitcode
+            - |
+              if [ $? -eq 2 ]; then
+                echo "Changes detected, applying..."
+                terraform apply -var-file="dev.tfvars" -auto-approve
+              else
+                echo "No changes detected, skipping apply."
+              fi
 
     Staging:
       - step: *docker_build_and_push_ecr
