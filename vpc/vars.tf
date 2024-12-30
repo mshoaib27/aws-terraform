@@ -7,11 +7,11 @@ variable "region" {
 variable "vpc_cidr" {
   description = "The CIDR block for the VPC."
   type        = list(string)
-  default     = ["12.1.0.0/24"]
+  default     = ["12.1.0.0/25"]
 }
 
 variable "num_azs" {
   description = "Number of Availability Zones to use"
   type        = number
-  default     = 3
+  default     = 4
 }

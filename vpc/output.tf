@@ -13,7 +13,7 @@ output "private_subnets" {
   value       = module.vpc.private_subnets
 }
 
-/* output "nat_eip" {
+output "nat_eip" {
   description = "Elastic IP allocated for the NAT Gateway"
   value       = aws_eip.nat.*.public_ip
-} */
+}

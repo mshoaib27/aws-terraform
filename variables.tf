@@ -1,13 +1,17 @@
+############################################### Region #####################################
+
 variable "region" {
   description = "The AWS region to deploy the resources."
   type        = string
   default     = "sa-east-1"
 }
 
+########################################## VPC #############################################
+
 variable "vpc_cidr" {
   description = "The CIDR block for the VPC."
   type        = list(string)
-  default     = ["18.1.0.0/16"]
+  default     = ["12.1.0.0/25"]
 }
 
 variable "num_azs" {
@@ -15,6 +19,8 @@ variable "num_azs" {
   type        = number
   default     = 4
 }
+
+########################################## EC2 #############################################
 
 variable "instances" {
   description = "A list of maps containing EC2 instance configurations."
@@ -38,13 +44,9 @@ variable "ami_id" {
 variable "key_name" {
   description = "The key pair name for SSH access to EC2 instances"
   type        = string
-  default     = "my-key-pair" # Replace with your key pair name
+  default     = "test" # Replace with your key pair name
 }
 
-/* variable "subnets" {
-  description = "List of private subnets where EC2 instances will be launched"
-  type        = list(string)
-} */ 
 
 variable "enabled_cloudwatch_logs_exports" {
   description = "Set of log types to export to CloudWatch. Supported: `audit`, `error`, `general`, `slowquery`, `postgresql`"
@@ -58,3 +60,38 @@ variable "tags" {
     Environment = "staging"
   }
 }
+
+########################################## RDS #############################################
+
+variable "clusters" {
+  description = "A list of maps containing cluster configurations."
+  type = list(object({
+    name                = string
+    create_cluster      = bool
+    multi_az            = bool
+   # reader_count         = number
+   # reader_instance_class = string
+   # writer_instance_class = string
+
+  }))
+  default = [
+    { name = "test-1", create_cluster = false, multi_az = false, },
+    { name = "test-2", create_cluster = true, multi_az = true,  },
+  ]
+}
+/* 
+variable "private_subnets" {
+  type = list(string)
+} */
+
+variable "master_username" {
+  default = "masterpgsql"
+}
+
+variable "kms_key_id" {
+  default = ""
+}
+
+/* variable "sg_id" {
+  type = list(string)
+} */

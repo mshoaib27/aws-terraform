@@ -34,3 +34,4 @@
 # output "cluster_reader_endpoint" {
 #   value = { for k, v in module.aurora_postgresql_v2 : k => v.cluster_reader_endpoint }
 # }
+

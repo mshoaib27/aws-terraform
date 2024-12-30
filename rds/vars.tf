@@ -1,7 +1,7 @@
 variable "region" {
   description = "The AWS region to deploy the resources."
   type        = string
-  default     = "us-east-1"
+  default     = "sa-east-1"
 }
 
 variable "clusters" {
@@ -9,20 +9,20 @@ variable "clusters" {
   type = list(object({
     name                = string
     create_cluster      = bool
-    min_capacity        = number
-    max_capacity        = number
+    multi_az            = bool
+#    reader_count         = number
+#    reader_instance_class = string
+#    writer_instance_class = string
+
   }))
   default = [
-    { name = "clients-8-b",   create_cluster = false,   min_capacity = 0.5, max_capacity = 8 },
-    { name = "clients-4-7", create_cluster = false,   min_capacity = 0.5, max_capacity = 8 },
-    { name = "clients-0-3",   create_cluster = false,  min_capacity = 0.5, max_capacity = 2 },
-     { name = "clients-c-f",   create_cluster = false,  min_capacity = 0.5, max_capacity = 1 },
+    { name = "test-1", create_cluster = false, multi_az = false,  },
+    { name = "test-2", create_cluster = true, multi_az = true, },
   ]
 }
 
-variable "subnet_ids" {
-  description = "List of private subnet IDs for the Aurora RDS subnet group"
-  type        = list(string)
+variable "private_subnets" {
+  type = list(string)
 }
 
 variable "vpc_id" {
@@ -44,17 +44,11 @@ variable "tags" {
 }
 
 variable "master_username" {
-  default = "masterpgsql"
+  default = "mastermysql"
 }
 
 variable "kms_key_id" {
   default = ""
-}
-
-variable "vpc_cidr" {
-  description = "The CIDR block for the VPC."
-  type        = list(string)
-  default     = ["12.1.0.0/16"]
 }
 
 variable "sg_id" {

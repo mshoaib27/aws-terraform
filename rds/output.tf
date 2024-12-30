@@ -1,7 +1,7 @@
-output "postgresql_cluster_id" {
-  description = "The RDS Cluster Identifier"
-  value = { for k, v in module.aurora_postgresql_v2 : k => v.cluster_id }
-}
+# output "postgresql_cluster_id" {
+#  description = "The RDS Cluster Identifier"
+#  value = { for k, v in module.rds_mysql : k => v.cluster_id }
+#}
 
 # output "rds_cluster_ids" {
 #   description = "List of RDS cluster IDs"
@@ -21,7 +21,7 @@ output "postgresql_cluster_id" {
 # # output "db_subnet_group_names" {
 # #   description = "Names of the RDS DB subnet groups"
 # #   value       = [for name, subnet in aws_db_subnet_group.aurora_db_subnet_group : subnet.name]
-# # }
+# # }s
 
 # output "db_master_passwords" {
 #   description = "Master passwords for each RDS cluster"

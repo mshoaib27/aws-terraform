@@ -4,31 +4,41 @@ variable "instances" {
     name                    = string
     create_instance         = bool
     instance_type           = string
-    associate_public_ip_address = bool  # Whether to associate a public IP
+    associate_public_ip_address = bool
+    subnet_id                = list(string)  
   }))
-  default = [
-  ]
+  default = [ ]
 }
 
 variable "ami_id" {
   description = "The AMI ID for the EC2 instances"
   type        = string
-  default     = "ami-1234567890abcdef0" # Replace with your desired AMI ID
+  default     = "ami-1234567890abcdef0" 
 }
 
 variable "key_name" {
   description = "The key pair name for SSH access to EC2 instances"
   type        = string
-  default     = "my-key-pair" # Replace with your key pair name
+  default     = "test" 
 }
 
-/* variable "subnets" {
-  description = "List of private subnets where EC2 instances will be launched"
-  type        = map(string)
-} */
+variable "private_subnets" {
+  type = list(string)
+}
+
+variable "vpc_id" {
+    description = "vpc id"
+    type = string
+}
 
 variable "region" {
   description = "AWS region to deploy resources"
   type        = string
-  default     = "us-east-1"
+  default     = "sa-east-1"
+}
+
+variable "instance_type" {
+  description = "The type of instance to start"
+  type        = string
+  default     = "t3.micro"
 }

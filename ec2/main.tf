@@ -1,27 +1,40 @@
-locals {
-  # Convert instances to a map for easy access in the for_each loop
-  instance_map = { for instance in var.instances : instance.name => instance if instance.create_instance }
-}
 
-module "ec2_instances" {
+
+
+module "ec2_instance" {
   source  = "terraform-aws-modules/ec2-instance/aws"
-  for_each = local.instance_map
 
-  name        = each.key
-  instance_type = each.value.instance_type
-  ami          = var.ami_id
-  key_name     = var.key_name
-  monitoring   = true
-  enable_volume_tags = true
-
-  # Use lookup function to dynamically assign subnet based on availability zone
-  subnet_id = lookup(var.subnets, each.value.availability_zone)
+  name = "test-instance"
+  instance_type = var.instance_type
+  key_name               = "test"
+  monitoring             = true
+  create_eip             = true
+  subnet_id           = var.private_subnets[0]
+  create_iam_instance_profile = true
+  iam_role_description        = "IAM role for EC2 instance"
+  iam_role_policies = {
+    AdministratorAccess = "arn:aws:iam::aws:policy/AdministratorAccess"
+  } 
+  root_block_device = [
+    {
+      encrypted   = true
+      volume_type = "gp3"
+      throughput  = 200
+      volume_size = 10
+    },
+  ]
+  ebs_block_device = [
+    {
+      device_name = "/dev/sdf"
+      volume_type = "gp3"
+      volume_size = 5
+      throughput  = 200
+      encrypted   = false
+    }
+  ] 
 
   tags = {
-    Name = each.key
+    Name   = "shoaib"
+    Environment = "dev"
   }
-  depends_on = [module.vpc]
-
-  # Optionally enable public IP if you want instances to have a public IP
-  associate_public_ip_address = each.value.associate_public_ip_address
 }
