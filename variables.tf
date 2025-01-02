@@ -92,6 +92,6 @@ variable "kms_key_id" {
   default = ""
 }
 
-/* variable "sg_id" {
+/*  variable "sg_id" {
   type = list(string)
-} */
+}  */

@@ -19,13 +19,29 @@ module "vpc" {
 }
 
   module "rds_mysql" {
-  source              = "./rds"
+  source              = "./rds-aurora"
   clusters            = var.clusters
   region              = var.region
-  vpc_id              = module.vpc.vpc_id             
+  vpc_id              = module.vpc.vpc_id          
   private_subnets     = module.vpc.private_subnets
   master_username     = var.master_username
   enabled_cloudwatch_logs_exports = var.enabled_cloudwatch_logs_exports
   tags                = var.tags
-  sg_id =  []
+  sg_id =  [module.sg.sg_id]
+}
+
+module "rds" {
+  source = "./rds"
+  region = var.region
+  vpc_id = module.vpc.vpc_id
+  private_subnets = module.vpc.private_subnets
+  master_username = var.master_username
+  sg_id = [module.sg.sg_id ]
+}
+
+module "sg" {
+  source = "./sg"
+  vpc_id = module.vpc.vpc_id
+  tags = var.tags
+
 }

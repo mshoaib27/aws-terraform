@@ -10,21 +10,28 @@ resource "aws_db_subnet_group" "rds_db_subnet_group" {
   subnet_ids  = var.private_subnets
 }
 
-module "rds_mysql" {
-  source                  = "terraform-aws-modules/rds/aws"
+module "aurora_mysql" {
+  source                  = "terraform-aws-modules/rds-aurora/aws"
   for_each                = { for cluster in local.clusters : cluster.name => cluster if cluster.create_cluster }
-  identifier = each.value.name
-  engine = "mysql"
-  engine_version = "8.0"
-  major_engine_version = "8.0"
-  family = "mysql8.0"
+  name = each.value.name
+  engine                  = "aurora-mysql"
   instance_class          = "db.t3.medium"
-  allocated_storage = 8
+  instances = {
+    instance-1 = {
+      instance_class = "db.t3.medium"
+      identifier     = "instance-1"
+    }
+    instance-2 = {
+      instance_class = "db.t3.medium"
+      identifier     = "instance-2"
+    }
+  }
   storage_encrypted       = true
   kms_key_id              = var.kms_key_id
-  username         = var.master_username
+  master_username         = var.master_username
+  vpc_id                  = var.vpc_id
   vpc_security_group_ids  = var.sg_id
-  password         = random_password.master[each.key].result
+  master_password         = random_password.master[each.key].result
   db_subnet_group_name    = aws_db_subnet_group.rds_db_subnet_group[each.key].name
   apply_immediately       = true
   skip_final_snapshot     = true

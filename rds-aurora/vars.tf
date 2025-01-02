@@ -16,8 +16,8 @@ variable "clusters" {
 
   }))
   default = [
-    { name = "test-1", create_cluster = false, multi_az = true,  },
-    { name = "test-2", create_cluster = true, multi_az = false, },
+    { name = "test-1", create_cluster = false, multi_az = false,  },
+    { name = "test-2", create_cluster = true, multi_az = true, },
   ]
 }
 
@@ -44,7 +44,7 @@ variable "tags" {
 }
 
 variable "master_username" {
-  default = "mysql"
+  default = "mastermysql"
 }
 
 variable "kms_key_id" {
