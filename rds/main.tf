@@ -32,7 +32,42 @@ module "rds_mysql" {
   backup_retention_period = 7
   performance_insights_enabled = false
   iam_database_authentication_enabled = true
-  monitoring_interval     = 0
+  monitoring_interval     = "5"
+  create_monitoring_role = true
+  monitoring_role_name = "rdsmonitoring-role"
+  parameters = [
+    {
+    name  = "innodb_buffer_pool_size"
+    value = "128M"
+    },{
+    name = "connect_timeout"
+    value = "30"
+    },{
+      name         = "innodb_lock_wait_timeout"
+      value        = 300
+      }, {
+      name         = "log_output"
+      value        = "FILE"
+      }, {
+      name         = "max_allowed_packet"
+      value        = "67108864"
+      }, {
+      name         = "aurora_parallel_query"
+      value        = "OFF"
+      }, {
+      name         = "binlog_format"
+      value        = "ROW"
+      }, {
+      name         = "log_bin_trust_function_creators"
+      value        = 1
+      }, {
+      name         = "require_secure_transport"
+      value        = "ON"
+      }, {
+      name         = "tls_version"
+      value        = "TLSv1.2"
+      }
+  ]
   tags = merge(
     var.tags,
     {
@@ -42,12 +77,9 @@ module "rds_mysql" {
   )
 }
 
-
 # Supporting Resources
 resource "random_password" "master" {
   for_each = { for cluster in local.clusters : cluster.name => cluster if cluster.create_cluster }
   length  = 20
   special = false
 }
-
-
