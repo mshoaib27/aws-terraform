@@ -32,6 +32,7 @@ module "rds_mysql" {
   backup_retention_period = 7
   performance_insights_enabled = false
   iam_database_authentication_enabled = true
+  enabled_cloudwatch_logs_exports = ["audit","error","general","postgresql","slowquery","upgrade"]
   monitoring_interval     = "5"
   create_monitoring_role = true
   monitoring_role_name = "rdsmonitoring-role"

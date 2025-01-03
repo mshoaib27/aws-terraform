@@ -38,6 +38,8 @@ module "aurora_mysql" {
   deletion_protection     = false
   backup_retention_period = 7
   performance_insights_enabled = false
+  create_security_group = false
+  enabled_cloudwatch_logs_exports = ["audit","error","general","slowquery"]
   db_cluster_parameter_group_parameters = [
     {
     name  = "innodb_buffer_pool_size"

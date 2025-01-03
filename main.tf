@@ -43,5 +43,15 @@ module "sg" {
   source = "./sg"
   vpc_id = module.vpc.vpc_id
   tags = var.tags
+}
 
+module "kms"{
+  source = "./kms"
+}
+
+module "efs" {
+  source = "./efs"
+  region = var.region
+  vpc_id = module.vpc.vpc_id
+  private_subnets = module.vpc.private_subnets
 }
