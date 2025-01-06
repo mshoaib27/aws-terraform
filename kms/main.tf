@@ -7,7 +7,7 @@ resource "aws_iam_role" "kms_key_admin" {
         Action = "sts:AssumeRole",
         Effect = "Allow",
         Principal = {
-          Service = "ec2.amazonaws.com" # Adjust as needed for the service assuming the role
+          Service = "ec2.amazonaws.com" 
         }
       }
     ]
@@ -48,12 +48,13 @@ resource "aws_iam_policy" "kms_key_admin_policy" {
 
 module "kms" {
   source = "terraform-aws-modules/kms/aws"
-  aliases = ["alias/test-efs"]
+  aliases = ["test-efs"]
 
   description = "efs encryption key"
   key_usage = "ENCRYPT_DECRYPT"
   deletion_window_in_days = 30
   multi_region = false
+ 
 
   key_administrators = [aws_iam_role.kms_key_admin.arn]
   enable_key_rotation     = false
@@ -66,6 +67,8 @@ module "kms" {
   grants = {
     efs = {
         operations = ["Encrypt","Decrypt","GenerateDataKey"]
-  }
+        grantee_principal = "efs.amazonaws.com"
+        
+}
 }
 }

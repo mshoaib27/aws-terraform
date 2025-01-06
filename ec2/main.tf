@@ -30,9 +30,19 @@ module "ec2_instance" {
       encrypted   = false
     }
   ] 
-
   tags = {
     Name   = "shoaib"
     Environment = "dev"
   }
+  user_data = <<-EOF
+      "sudo apt-get update -y",
+      "sudo apt-get install nfs-common -y",
+      "sudo apt-get install python3.8 -y",
+      "sudo apt-get install python3-pip -y",
+      "python --version",
+      "python3 --version",
+      "sudo mkdir -p /efs
+      "sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${module.efs.dns_name.this[0]}:/ /efs"
+      "sudo su -c \"echo '${module.efs.dns_name.this[0]}:/ /mnt/efs nfs4 defaults,vers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport 0 0' >> /etc/fstab\""
+      EOF      
 }

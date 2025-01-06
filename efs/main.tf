@@ -4,18 +4,10 @@ module "efs" {
   name           = "test"
   creation_token = "test-token"
   encrypted      = true
-  kms_key_arn    = module.kms.kms_key_arn
-
-  # performance_mode                = "maxIO"
-  # NB! PROVISIONED TROUGHPUT MODE WITH 256 MIBPS IS EXPENSIVE ~$1500/month
-  # throughput_mode                 = "provisioned"
-  # provisioned_throughput_in_mibps = 256
-
+  kms_key_arn    = var.kms_key_arn
   lifecycle_policy = {
     transition_to_ia = "AFTER_30_DAYS"
   }
-
-  # File system policy
   attach_policy                      = true
   bypass_policy_lockout_safety_check = false
   policy_statements = [
@@ -30,8 +22,6 @@ module "efs" {
       ]
     }
   ]
-
-  # Mount targets / security group
   mount_targets = {
     "sa-east-1a" = {
       subnet_id = var.private_subnets[0]

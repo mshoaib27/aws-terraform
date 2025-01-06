@@ -31,7 +31,7 @@ variable "instances" {
     associate_public_ip_address = bool  # Whether to associate a public IP
   }))
   default = [
-    { name = "sba-test-app", create_instance = true, instance_type = "t3.micro", associate_public_ip_address = false },
+    { name = "sba-test-app", create_instance = false, instance_type = "t3.micro", associate_public_ip_address = false },
   ]
 }
 
@@ -76,7 +76,7 @@ variable "clusters" {
   }))
   default = [
     { name = "test-1", create_cluster = false, multi_az = false, },
-    { name = "test-2", create_cluster = true, multi_az = true,  },
+    { name = "test-2", create_cluster = false, multi_az = true,  },
   ]
 }
 /* 
@@ -90,6 +90,12 @@ variable "master_username" {
 
 variable "kms_key_id" {
   default = ""
+}
+
+variable "kms_key_arn" {
+  type        = string
+  description = "Specifies the kms key used for this project."
+  default     = null
 }
 
 /*  variable "sg_id" {
