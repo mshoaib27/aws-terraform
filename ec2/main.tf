@@ -2,12 +2,12 @@ module "ec2_instance" {
   source  = "terraform-aws-modules/ec2-instance/aws"
   for_each = { for instance in var.instances : instance.name => instance if instance.create_instance }
 
-  name                      = each.value.name
-  instance_type             = each.value.instance_type
-  key_name                  = var.key_name
-  monitoring                = true
-  subnet_id                 = var.private_subnets[0]
-  ami                       = each.value.ami_id
+  name                        = each.value.name
+  instance_type               = each.value.instance_type
+  ami                         = each.value.ami_id
+  key_name                    = var.key_name
+  monitoring                  = true
+  subnet_id                   = var.private_subnets[0]
   associate_public_ip_address = each.value.associate_public_ip_address
 
   create_eip = false

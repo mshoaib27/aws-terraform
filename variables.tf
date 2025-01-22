@@ -23,16 +23,16 @@ variable "num_azs" {
 ########################################## EC2 #############################################
 
 variable "instances" {
-  description = "A list of maps containing EC2 instance configurations."
-  type = list(object({
-    name                    = string
-    create_instance         = bool
-    instance_type           = string
-    associate_public_ip_address = bool  # Whether to associate a public IP
-  }))
-  default = [
-    { name = "sba-app-01", create_instance = false, instance_type = "m5.large", associate_public_ip_address = false },
-  ]
+  description = "List of EC2 instances configuration"
+  type = list(
+    object({
+      name                        = string
+      instance_type               = string
+      ami_id                      = string
+      associate_public_ip_address = bool
+      create_instance             = bool
+    })
+  )
 }
 
 variable "ami_id" {
@@ -59,7 +59,7 @@ variable "enabled_cloudwatch_logs_exports" {
 variable "tags" {
   type = map(any)
   default = {
-    Environment = "staging"
+    Environment = "production"
   }
 }
 
@@ -72,29 +72,20 @@ variable "instance_type" {
 ########################################## RDS #############################################
 
 variable "clusters" {
-  description = "A list of maps containing cluster configurations."
+  description = "Configuration for RDS MySQL instances"
   type = list(object({
-    name                = string
-    create_cluster      = bool
-    multi_az            = bool
-   # reader_count         = number
-   # reader_instance_class = string
-   # writer_instance_class = string
-
+    name            = string
+    create_instance = bool
   }))
-  default = [
-    { name = "test-1", create_cluster = false, multi_az = false, },
-    { name = "test-2", create_cluster = false, multi_az = false,  },
-  ]
 }
-/* 
-variable "private_subnets" {
-  type = list(string)
-} */
+
 
 variable "master_username" {
-  default = "masterpgsql"
+  description = "Master username for RDS instances"
+  type        = string
+  default = ""
 }
+
 
 variable "kms_key_id" {
   default = ""
@@ -106,11 +97,64 @@ variable "kms_key_arn" {
   default     = null
 }
 
-/*  variable "sg_id" {
-  type = list(string)
-}  */
 
 variable "account_id" {
   type = string
   default = "739275445379"
+}
+
+
+variable "vpc_id" {
+  description = "VPC ID where Redis will be deployed"
+  type        = string
+  default = ""
+}
+
+variable "private_subnets" {
+  description = "List of private subnet IDs for Redis"
+  type        = list(string)
+  default = [ "" ]
+}
+
+variable "allowed_cidr_blocks" {
+  description = "List of CIDR blocks allowed to access Redis"
+  type        = list(string)
+  default =  ["" ]
+}
+
+variable "redis_cluster_id" {
+  description = "ID for the Redis cluster"
+  type        = string
+}
+
+variable "node_type" {
+  description = "The instance class for the Redis cluster (e.g., cache.t3.micro)"
+  type        = string
+}
+
+variable "num_cache_nodes" {
+  description = "The number of cache nodes in the Redis cluster"
+  type        = number
+}
+
+variable "create_alb" {
+  description = "Flag to determine if ALB should be created"
+  type        = bool
+  default     = false
+}
+
+variable "alb_name" {
+  description = "Name of the ALB"
+  type        = string
+}
+
+variable "internal" {
+  description = "Whether the load balancer is internal"
+  type        = bool
+  default     = false
+}
+variable "enable_deletion_protection" {
+  description = "Whether deletion protection is enabled for the ALB"
+  type        = bool
+  default     = false
 }

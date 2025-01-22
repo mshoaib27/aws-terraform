@@ -1,62 +1,37 @@
 variable "region" {
-  description = "The AWS region to deploy the resources."
+  description = "AWS region"
   type        = string
-  default     = "sa-east-1"
-}
-
-variable "clusters" {
-  description = "A list of maps containing cluster configurations."
-  type = list(object({
-    name                = string
-    create_cluster      = bool
-    multi_az            = bool
-#    reader_count         = number
-#    reader_instance_class = string
-#    writer_instance_class = string
-
-  }))
-  default = [
-    { name = "test-1", create_cluster = false, multi_az = false,  },
-    { name = "test-2", create_cluster = false, multi_az = false, },
-  ]
 }
 
 variable "private_subnets" {
-  type = list(string)
-}
-
-variable "vpc_id" {
-    description = "vpc id"
-    type = string
-}
-
-variable "enabled_cloudwatch_logs_exports" {
-  description = "Set of log types to export to CloudWatch. Supported: `audit`, `error`, `general`, `slowquery`, `postgresql`"
+  description = "List of private subnet IDs"
   type        = list(string)
-  default     = []
 }
 
-variable "tags" {
-  type = map(any)
-  default = {
-    Environment = "staging"
-  }
-}
-
-variable "master_username" {
-  default = "mysql"
+variable "clusters" {
+  description = "Configuration for RDS MySQL instances"
+  type = list(object({
+    name            = string
+    create_instance = bool
+  }))
 }
 
 variable "kms_key_id" {
-  default = ""
+  description = "KMS Key ID for encrypting RDS storage"
+  type        = string
+}
+
+variable "master_username" {
+  description = "Master username for RDS instances"
+  type        = string
 }
 
 variable "sg_id" {
-  type = list(string)
+  description = "Security Group ID for RDS instances"
+  type        = list(string)
 }
 
-variable "vpc_cidr" {
-  description = "The CIDR block for the VPC."
-  type        = list(string)
-  default     = ["12.1.0.0/25"]
+variable "tags" {
+  description = "Tags to apply to all resources"
+  type        = map(string)
 }
