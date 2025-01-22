@@ -1,7 +1,7 @@
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
-  name = "pipeline-vpc"
+  name = "sba-prod-vpc"
   cidr = var.vpc_cidr[0]
   #azs            = data.aws_availability_zones.available.names
   azs             = slice(data.aws_availability_zones.available.names, 0, min(var.num_azs, length(data.aws_availability_zones.available.names)))
@@ -13,10 +13,11 @@ module "vpc" {
   enable_dns_support   = true
 
   # NAT Gateways - Outbound Communication from Private Subnets to the Internet
-  single_nat_gateway  = true
-  enable_nat_gateway  = true
-  reuse_nat_ips       = true
+  single_nat_gateway  = false
+  enable_nat_gateway  = false
+  reuse_nat_ips       = false
   external_nat_ip_ids = aws_eip.nat.*.id
+  flow_log_file_format = "parquet"
 }
 
 resource "aws_eip" "nat" {

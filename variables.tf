@@ -31,22 +31,24 @@ variable "instances" {
     associate_public_ip_address = bool  # Whether to associate a public IP
   }))
   default = [
-    { name = "sba-test-app", create_instance = false, instance_type = "t3.micro", associate_public_ip_address = false },
+    { name = "sba-app-01", create_instance = false, instance_type = "m5.large", associate_public_ip_address = false },
   ]
 }
 
 variable "ami_id" {
   description = "The AMI ID for the EC2 instances"
   type        = string
-  default     = "ami-1234567890abcdef0" # Replace with your desired AMI ID
 }
 
 variable "key_name" {
   description = "The key pair name for SSH access to EC2 instances"
   type        = string
-  default     = "test" # Replace with your key pair name
 }
 
+variable "name" {
+  type = string
+  default = "null"
+}
 
 variable "enabled_cloudwatch_logs_exports" {
   description = "Set of log types to export to CloudWatch. Supported: `audit`, `error`, `general`, `slowquery`, `postgresql`"
@@ -59,6 +61,12 @@ variable "tags" {
   default = {
     Environment = "staging"
   }
+}
+
+variable "instance_type" {
+  description = "The type of instance to start"
+  type        = string
+  default = ""
 }
 
 ########################################## RDS #############################################
@@ -76,7 +84,7 @@ variable "clusters" {
   }))
   default = [
     { name = "test-1", create_cluster = false, multi_az = false, },
-    { name = "test-2", create_cluster = false, multi_az = true,  },
+    { name = "test-2", create_cluster = false, multi_az = false,  },
   ]
 }
 /* 
@@ -101,3 +109,8 @@ variable "kms_key_arn" {
 /*  variable "sg_id" {
   type = list(string)
 }  */
+
+variable "account_id" {
+  type = string
+  default = "739275445379"
+}

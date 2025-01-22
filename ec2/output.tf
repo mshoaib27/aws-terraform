@@ -12,3 +12,8 @@
   description = "List of EC2 private IPs"
   value = { for k, instance in module.ec2_instances : k => instance.private_ip }
 } */
+
+/* output "private_subnets" {
+  value = aws_subnet.private.*.id
+}
+ */

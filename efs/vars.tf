@@ -24,3 +24,8 @@ variable "kms_key_arn" {
   description = "Specifies the kms key used for this project."
   default     = null
 }
+
+variable "account_id" {
+  type = string
+  default = "739275445379"
+}

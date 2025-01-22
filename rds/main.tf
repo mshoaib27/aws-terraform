@@ -18,7 +18,7 @@ module "rds_mysql" {
   engine_version = "8.0"
   major_engine_version = "8.0"
   family = "mysql8.0"
-  instance_class          = "db.t3.medium"
+  instance_class          = "db.m6g.2xlarge"
   allocated_storage = 8
   storage_encrypted       = true
   kms_key_id              = var.kms_key_id
@@ -26,49 +26,25 @@ module "rds_mysql" {
   vpc_security_group_ids  = var.sg_id
   password         = random_password.master[each.key].result
   db_subnet_group_name    = aws_db_subnet_group.rds_db_subnet_group[each.key].name
+  parameter_group_name    = aws_db_parameter_group.rds_parameter_group[each.key].name
+  #replicate_source_db = module.rds_mysql.db_instance_identifier
   apply_immediately       = true
   skip_final_snapshot     = true
   deletion_protection     = false
   backup_retention_period = 7
   performance_insights_enabled = false
   iam_database_authentication_enabled = true
-  enabled_cloudwatch_logs_exports = ["audit","error","general","postgresql","slowquery","upgrade"]
+  enabled_cloudwatch_logs_exports = ["audit","error","general","slowquery"]
   monitoring_interval     = "5"
   create_monitoring_role = true
   monitoring_role_name = "rdsmonitoring-role"
   parameters = [
     {
-    name  = "innodb_buffer_pool_size"
-    value = "128M"
-    },{
-    name = "connect_timeout"
-    value = "30"
-    },{
-      name         = "innodb_lock_wait_timeout"
-      value        = 300
-      }, {
-      name         = "log_output"
-      value        = "FILE"
-      }, {
-      name         = "max_allowed_packet"
-      value        = "67108864"
-      }, {
-      name         = "aurora_parallel_query"
-      value        = "OFF"
-      }, {
-      name         = "binlog_format"
-      value        = "ROW"
-      }, {
-      name         = "log_bin_trust_function_creators"
-      value        = 1
-      }, {
-      name         = "require_secure_transport"
-      value        = "ON"
-      }, {
-      name         = "tls_version"
-      value        = "TLSv1.2"
-      }
+      name  = "connect_timeout"
+      value = "30"
+    },
   ]
+
   tags = merge(
     var.tags,
     {
@@ -84,3 +60,12 @@ resource "random_password" "master" {
   length  = 20
   special = false
 }
+
+resource "aws_db_parameter_group" "rds_parameter_group" {
+  for_each = { for cluster in local.clusters : cluster.name => cluster if cluster.create_cluster }
+  name     = "${each.value.name}-param-group"
+  family   = "mysql8.0"
+  description = "Custom parameter group for MySQL 8.0"
+}
+
+  

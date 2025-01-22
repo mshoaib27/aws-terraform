@@ -13,11 +13,17 @@ module "efs" {
   policy_statements = [
     {
       sid     = "Example"
-      actions = ["elasticfilesystem:ClientMount"]
+      actions = [
+        "elasticfilesystem:ClientMount",
+        "elasticfilesystem:DescribeFileSystems"
+        ]
+      resources = [
+        "arn:aws:elasticfilesystem:${var.region}:${var.account_id}:file-system/fs-"
+      ]
       principals = [
         {
           type        = "AWS"
-          identifiers = []
+          identifiers = ["arn:aws:iam::${var.account_id}:role/bitbucket-oidc-role"]
         }
       ]
     }
