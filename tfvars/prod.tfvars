@@ -1,53 +1,42 @@
+# Naming Convention Variables
+customer_name = "sba"
+environment   = "prod"
 
+# Server Counts
+app_server_count   = 2
+cron_server_count  = 1
+api_server_count   = 1
+
+# Instance Types
+app_server_instance_type    = "m5.xlarge"
+cron_server_instance_type   = "m5.xlarge"
+api_server_instance_type    = "m5.xlarge"
+jumper_server_instance_type = "t3.micro"
+
+# AWS Configuration
 account_id = "423623839339"
 region     = "sa-east-1"
-vpc_cidr = ["11.1.0.0/24"]
-num_azs  = 4
-ami_id   = "ami-0dccf463b6ff559ff"
+vpc_cidr   = ["11.1.0.0/24"]
+num_azs    = 4
+ami_id     = "ami-0dccf463b6ff559ff"
+key_name   = "sba-prod"
 
-key_name = "sba-prod"
+# RDS Configuration
+rds_instance_class       = "db.m5.large"
+rds_allocated_storage    = 100
+rds_engine_version       = "8.0.44"
+rds_multi_az             = true
+rds_storage_encrypted    = true
+rds_storage_type         = "gp3"
 
-instances = [
-  {
-    name                        = "sba-prod-app-01"
-    instance_type               = "m5.xlarge"
-    ami_id                      = "ami-0dccf463b6ff559ff"
-    associate_public_ip_address = false
-    create_instance             = true
-    private_ip   = "11.1.0.48/32"
-  },
-  {
-    name                        = "sba-prod-app-02"
-    instance_type               = "m5.xlarge"
-    ami_id                      = "ami-0dccf463b6ff559ffd"
-    associate_public_ip_address = false
-    create_instance             = true
-    private_ip  = "11.1.0.58/32"
-  },
-  {
-    name                        = "sba-prod-api-01"
-    instance_type               = "m5.xlarge"
-    ami_id                      = "ami-0dccf463b6ff559ff"
-    associate_public_ip_address = false
-    create_instance             = true
-    private_ip                  = "11.1.0.46/32"
-  },
-  {
-    name                        = "sba-prod-cron-01"
-    instance_type               = "m5.xlarge"
-    ami_id                      = "ami-0dccf463b6ff559ff"
-    associate_public_ip_address = false
-    create_instance             = true
-    private_ip   = "11.1.0.62/32"
-  },
+master_username = "admin"
+enabled_cloudwatch_logs_exports = ["error", "general", "slowquery"]
 
-/*   {
-    name      = "prod-jump"
-    instance_type = "t3.micro"
-    ami_id       = "ami-0780816dd7ce942fd"
-    associate_public_ip_address = true
-    create_instance = true
-  }, */
+# Tags
+tags = {
+  Environment = "prod"
+  Project     = "sba"
+}
 ]
 
 # RDS Configuration

@@ -1,24 +1,26 @@
-module "ec2_instance" {
+# Create app servers
+module "ec2_app_servers" {
   source  = "terraform-aws-modules/ec2-instance/aws"
-  for_each = { for instance in var.instances : instance.name => instance if instance.create_instance }
+  for_each = { for name in var.app_server_names : name => name }
 
-  name                        = each.value.name
-  instance_type               = each.value.instance_type
-  ami                         = each.value.ami_id
+  name                        = each.value
+  instance_type               = var.app_server_instance_type
+  ami                         = "ami-03446a3af42c5e74e"
   key_name                    = var.key_name
   monitoring                  = true
   subnet_id                   = var.private_subnets[0]
-  associate_public_ip_address = each.value.associate_public_ip_address
-  create_eip = false
+  associate_public_ip_address = false
+  create_eip                  = false
   iam_instance_profile        = var.iam_instance_profile
+  
   root_block_device = {
-    encrypted   = true
-    volume_type = "gp3"
-    throughput  = 200
-    volume_size = 60
+    encrypted             = true
+    volume_type           = "gp3"
+    throughput            = 200
+    volume_size           = 60
+    delete_on_termination = true
   }
 
-  # User data for installing Apache, PHP 7.4 and EFS mount
   user_data = base64encode(templatefile("${path.module}/user_data.sh", {
     efs_dns_name = var.efs_dns_name
   }))
@@ -26,58 +28,136 @@ module "ec2_instance" {
   tags = merge(
     var.tags,
     {
-      Name      = each.value.name
+      Name      = each.value
       owner     = "shoaib"
       Terraform = "true"
     }
   )
 }
 
-######################### Jumper EC2 Instance (Public) #########################
-resource "aws_instance" "jumper" {
-  ami                    = "ami-03446a3af42c5e74e"  # Same AMI as private instance
-  instance_type          = "t3.small"
-  subnet_id              = var.public_subnets[0]
-  key_name               = var.key_name
-  associate_public_ip_address = true
-  monitoring             = true
-  iam_instance_profile   = var.iam_instance_profile
+# Create cron servers
+module "ec2_cron_servers" {
+  source  = "terraform-aws-modules/ec2-instance/aws"
+  for_each = { for name in var.cron_server_names : name => name }
+
+  name                        = each.value
+  instance_type               = var.cron_server_instance_type
+  ami                         = "ami-03446a3af42c5e74e"
+  key_name                    = var.key_name
+  monitoring                  = true
+  subnet_id                   = var.private_subnets[0]
+  associate_public_ip_address = false
+  create_eip                  = false
+  iam_instance_profile        = var.iam_instance_profile
   
-  root_block_device {
-    encrypted   = true
-    volume_type = "gp3"
-    throughput  = 200
-    volume_size = 60
+  root_block_device = {
+    encrypted             = true
+    volume_type           = "gp3"
+    throughput            = 200
+    volume_size           = 60
     delete_on_termination = true
   }
 
-  vpc_security_group_ids = [aws_security_group.jumper_sg.id]
+  user_data = base64encode(templatefile("${path.module}/user_data.sh", {
+    efs_dns_name = var.efs_dns_name
+  }))
 
-  tags = {
-    Name      = "tt-uat-jumper"
-    owner     = "shoaib"
-    Terraform = "true"
+  tags = merge(
+    var.tags,
+    {
+      Name      = each.value
+      owner     = "shoaib"
+      Terraform = "true"
+    }
+  )
+}
+
+# Create API servers
+module "ec2_api_servers" {
+  source  = "terraform-aws-modules/ec2-instance/aws"
+  for_each = { for name in var.api_server_names : name => name }
+
+  name                        = each.value
+  instance_type               = var.api_server_instance_type
+  ami                         = "ami-03446a3af42c5e74e"
+  key_name                    = var.key_name
+  monitoring                  = true
+  subnet_id                   = var.private_subnets[0]
+  associate_public_ip_address = false
+  create_eip                  = false
+  iam_instance_profile        = var.iam_instance_profile
+  
+  root_block_device = {
+    encrypted             = true
+    volume_type           = "gp3"
+    throughput            = 200
+    volume_size           = 60
+    delete_on_termination = true
   }
 
-  depends_on = [var.public_subnets]
+  user_data = base64encode(templatefile("${path.module}/user_data.sh", {
+    efs_dns_name = var.efs_dns_name
+  }))
+
+  tags = merge(
+    var.tags,
+    {
+      Name      = each.value
+      owner     = "shoaib"
+      Terraform = "true"
+    }
+  )
+}
+
+# Create jumper/bastion server (public)
+resource "aws_instance" "jumper" {
+  ami                         = "ami-03446a3af42c5e74e"
+  instance_type               = var.jumper_server_instance_type
+  subnet_id                   = var.public_subnets[0]
+  key_name                    = var.key_name
+  associate_public_ip_address = true
+  monitoring                  = true
+  iam_instance_profile        = var.iam_instance_profile
+  vpc_security_group_ids      = [aws_security_group.jumper_sg.id]
+  
+  root_block_device {
+    encrypted             = true
+    volume_type           = "gp3"
+    throughput            = 200
+    volume_size           = 60
+    delete_on_termination = true
+  }
+
+  tags = merge(
+    var.tags,
+    {
+      Name      = var.jumper_name
+      owner     = "shoaib"
+      Terraform = "true"
+    }
+  )
+
+  depends_on = [aws_security_group.jumper_sg]
 }
 
 resource "aws_eip" "jumper" {
   instance = aws_instance.jumper.id
   domain   = "vpc"
 
-  tags = {
-    Name      = "tt-uat-jumper-eip"
-    owner     = "shoaib"
-    Terraform = "true"
-  }
+  tags = merge(
+    var.tags,
+    {
+      Name      = "${var.jumper_name}-eip"
+      owner     = "shoaib"
+      Terraform = "true"
+    }
+  )
 
   depends_on = [aws_instance.jumper]
 }
 
-######################### Jumper Security Group #########################
 resource "aws_security_group" "jumper_sg" {
-  name        = "jumper-sg"
+  name_prefix = "jumper-sg-"
   description = "Security group for jumper EC2 instance"
   vpc_id      = var.vpc_id
 
@@ -113,11 +193,14 @@ resource "aws_security_group" "jumper_sg" {
     description = "Allow all outbound traffic"
   }
 
-  tags = {
-    Name      = "jumper-sg"
-    owner     = "shoaib"
-    Terraform = "true"
-  }
+  tags = merge(
+    var.tags,
+    {
+      Name      = "jumper-sg"
+      owner     = "shoaib"
+      Terraform = "true"
+    }
+  )
 }
 
 

@@ -42,8 +42,58 @@ variable "iam_instance_profile" {
   default     = ""
 }
 
+# New naming convention variables
+variable "app_server_names" {
+  description = "List of app server names"
+  type        = list(string)
+  default     = []
+}
+
+variable "cron_server_names" {
+  description = "List of cron server names"
+  type        = list(string)
+  default     = []
+}
+
+variable "api_server_names" {
+  description = "List of API server names"
+  type        = list(string)
+  default     = []
+}
+
+variable "jumper_name" {
+  description = "Jumper/bastion server name"
+  type        = string
+  default     = "jumper"
+}
+
+variable "app_server_instance_type" {
+  description = "Instance type for app servers"
+  type        = string
+  default     = "m5.large"
+}
+
+variable "cron_server_instance_type" {
+  description = "Instance type for cron servers"
+  type        = string
+  default     = "t3.medium"
+}
+
+variable "api_server_instance_type" {
+  description = "Instance type for API servers"
+  type        = string
+  default     = "m5.xlarge"
+}
+
+variable "jumper_server_instance_type" {
+  description = "Instance type for jumper/bastion server"
+  type        = string
+  default     = "t3.small"
+}
+
+# Deprecated - kept for backward compatibility
 variable "instances" {
-  description = "List of EC2 instances configuration"
+  description = "List of EC2 instances configuration (DEPRECATED - use app/cron/api server names)"
   type = list(
     object({
       name                        = string
@@ -53,6 +103,7 @@ variable "instances" {
       create_instance             = bool
     })
   )
+  default = []
 }
 
 variable "ami_id" {
@@ -62,10 +113,9 @@ variable "ami_id" {
 }
 
 variable "private_ip" {
-description = "private ip of ec2 instances"
-type = string
-default = ""
+  description = "private ip of ec2 instances"
+  type        = string
+  default     = ""
 }
-  
 
 

@@ -1,24 +1,37 @@
 account_id      = "419344669752"
-region        = "eu-west-1"
-num_azs       = 3
-vpc_cidr      = ["10.1.0.0/24"]
-ami_id        = "ami-03446a3af42c5e74e"  ##uuntu 24.04 AMI
-key_name      = "tasctower"
+region          = "eu-west-1"
+num_azs         = 3
+vpc_cidr        = ["10.1.0.0/24"]
+ami_id          = "ami-03446a3af42c5e74e"  # Ubuntu 24.04 AMI
+key_name        = "tasctower"
 
-instances = [
-  { name = "tt-uat-app", create_instance = true, instance_type = "m5.large", ami_id = "ami-03446a3af42c5e74e", associate_public_ip_address = false },
-]
+########################################## Naming Convention ####################################
+customer_name   = "tt"
+environment     = "uat"
 
-rds_instance_name = "tt-uat"
+########################################## EC2 Server Counts ###################################
+# Application servers (tt-uat-app-01, tt-uat-app-02, etc)
+app_server_count            = 1
+app_server_instance_type    = "m5.large"
 
+# Cron/Scheduler servers (tt-uat-cron-01, tt-uat-cron-02, etc)
+cron_server_count           = 1
+cron_server_instance_type   = "t3.medium"
 
+# API servers (tt-uat-api-01, tt-uat-api-02, etc)
+api_server_count            = 1
+api_server_instance_type    = "m5.xlarge"
+
+# Jumper/Bastion server (tt-uat-jumper)
+jumper_server_instance_type = "t3.small"
+
+########################################## RDS Configuration ###################################
 rds_instance_class    = "db.m5.large"
 rds_allocated_storage = 60
 rds_storage_type      = "gp3"
 rds_storage_encrypted = true
 
-
-rds_engine           = "mysql"
+rds_engine            = "mysql"
 rds_engine_version   = "8.0"
 rds_parameter_family = "mysql8.0"
 

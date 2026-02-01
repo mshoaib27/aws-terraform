@@ -6,6 +6,25 @@ variable "region" {
   default     = "sa-east-1"
 }
 
+########################################## Naming Convention #################################
+
+variable "customer_name" {
+  description = "Customer/Project name for resource naming"
+  type        = string
+  default     = "tt"
+}
+
+variable "environment" {
+  description = "Environment name (dev, uat, prod, preprod)"
+  type        = string
+  default     = "uat"
+
+  validation {
+    condition     = contains(["dev", "uat", "staging", "preprod", "prod"], var.environment)
+    error_message = "Environment must be dev, uat, staging, preprod, or prod."
+  }
+}
+
 ########################################## VPC #############################################
 
 variable "vpc_cidr" {
@@ -22,8 +41,65 @@ variable "num_azs" {
 
 ########################################## EC2 #############################################
 
+variable "app_server_count" {
+  description = "Number of application servers to create (tt-env-app-01, tt-env-app-02, etc)"
+  type        = number
+  default     = 1
+
+  validation {
+    condition     = var.app_server_count >= 0 && var.app_server_count <= 10
+    error_message = "App server count must be between 0 and 10."
+  }
+}
+
+variable "cron_server_count" {
+  description = "Number of cron/scheduler servers to create (tt-env-cron-01, tt-env-cron-02, etc)"
+  type        = number
+  default     = 0
+
+  validation {
+    condition     = var.cron_server_count >= 0 && var.cron_server_count <= 5
+    error_message = "Cron server count must be between 0 and 5."
+  }
+}
+
+variable "api_server_count" {
+  description = "Number of API servers to create (tt-env-api-01, tt-env-api-02, etc)"
+  type        = number
+  default     = 1
+
+  validation {
+    condition     = var.api_server_count >= 0 && var.api_server_count <= 10
+    error_message = "API server count must be between 0 and 10."
+  }
+}
+
+variable "app_server_instance_type" {
+  description = "Instance type for application servers"
+  type        = string
+  default     = "m5.large"
+}
+
+variable "cron_server_instance_type" {
+  description = "Instance type for cron/scheduler servers"
+  type        = string
+  default     = "t3.medium"
+}
+
+variable "api_server_instance_type" {
+  description = "Instance type for API servers"
+  type        = string
+  default     = "m5.xlarge"
+}
+
+variable "jumper_server_instance_type" {
+  description = "Instance type for jumper/bastion server"
+  type        = string
+  default     = "t3.small"
+}
+
 variable "instances" {
-  description = "List of EC2 instances configuration"
+  description = "List of EC2 instances configuration (DEPRECATED - use app/cron/api server counts)"
   type = list(
     object({
       name                        = string
@@ -33,6 +109,7 @@ variable "instances" {
       create_instance             = bool
     })
   )
+  default = []
 }
 
 variable "ami_id" {

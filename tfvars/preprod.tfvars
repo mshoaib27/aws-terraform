@@ -1,53 +1,42 @@
+# Naming Convention Variables
+customer_name = "sba"
+environment   = "preprod"
 
+# Server Counts
+app_server_count   = 1
+cron_server_count  = 1
+api_server_count   = 0
+
+# Instance Types
+app_server_instance_type    = "m5.xlarge"
+cron_server_instance_type   = "m5.xlarge"
+api_server_instance_type    = "m5.xlarge"
+jumper_server_instance_type = "t4g.medium"
+
+# AWS Configuration
 account_id = "423623839339"
 region     = "sa-east-1"
-vpc_cidr = ["10.1.16.0/24"]
-num_azs  = 4
-ami_id   = "ami-0dccf463b6ff559ff"
+vpc_cidr   = ["10.1.16.0/24"]
+num_azs    = 4
+ami_id     = "ami-0dccf463b6ff559ff"
+key_name   = "sba-prod"
 
-key_name = "sba-prod"
+# RDS Configuration
+rds_instance_class       = "db.m5.large"
+rds_allocated_storage    = 80
+rds_engine_version       = "8.0.44"
+rds_multi_az             = false
+rds_storage_encrypted    = true
+rds_storage_type         = "gp3"
 
-instances = [
-  {
-    name                        = "sba-preprod-app-01"
-    instance_type               = "m5.xlarge"
-    ami_id                      = "ami-0975628249d7e8952"
-    associate_public_ip_address = false
-    create_instance             = true
-  },
-  {
-    name                        = "sba-preprod-cron"
-    instance_type               = "m5.xlarge"
-    ami_id                      = "ami-0975628249d7e8952"
-    associate_public_ip_address = false
-    create_instance             = true
-  },
-{
-  name                        = "sba-preprod-sftp"
-  instance_type               = "t4g.medium"
-  ami_id                      = "ami-04d1bc0e151921904"
-  associate_public_ip_address = true
-  create_instance             = true
-  root_block_device = [
-    {
-      encrypted   = true
-      volume_type = "gp3"
-      throughput  = 200
-      volume_size = 30
-    }
-  ]
+master_username = "admin"
+enabled_cloudwatch_logs_exports = ["error", "general", "slowquery"]
+
+# Tags
+tags = {
+  Environment = "preprod"
+  Project     = "sba"
 }
-
-/** {
-    name                        = "sba-preprod-cron-01"
-    instance_type               = "m5.xlarge"
-    ami_id                      = "ami-0dccf463b6ff559ff"
-    associate_public_ip_address = false
-    create_instance             = false
-    private_ip   = "11.1.0.62/32"
-  }, */
-
-/*   {
     name      = "preprod-jump"
     instance_type = "t3.micro"
     ami_id       = "ami-0780816dd7ce942fd"
