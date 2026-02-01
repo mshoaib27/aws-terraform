@@ -56,3 +56,10 @@ plan*
 apply*
 tfplan*
 
+# Sensitive/Secret variables (NEVER COMMIT)
+secrets.tfvars
+tfvars/secrets.tfvars
+*.secret
+.env
+.env.local
+
