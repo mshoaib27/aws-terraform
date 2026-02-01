@@ -19,13 +19,8 @@ variable "private_subnets" {
   type = list(string)
 }
 
-variable "kms_key_arn" {
-  type        = string
-  description = "Specifies the kms key used for this project."
-  default     = null
-}
-
-variable "account_id" {
-  type = string
-  default = "739275445379"
+variable "tags" {
+  description = "Tags to apply to all resources"
+  type        = map(string)
+  default     = {}
 }

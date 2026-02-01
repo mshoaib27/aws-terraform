@@ -20,10 +20,6 @@ variable "security_groups" {
   type        = list(string)
 }
 
-variable "subnets" {
-  description = "List of subnet IDs to attach the ALB to"
-  type        = list(string)
-}
 
 variable "vpc_id" {
   description = "VPC ID for the ALB"
@@ -39,4 +35,25 @@ variable "enable_deletion_protection" {
 variable "tags" {
   description = "Tags to assign to resources"
   type        = map(string)
+}
+variable "public_subnets" {
+  type = list(string)
+}
+
+variable "register_targets" {
+  description = "Whether to register targets to the target group"
+  type        = bool
+  default     = false
+}
+
+variable "target_instance_id" {
+  description = "EC2 instance ID to register to the target group"
+  type        = string
+  default     = ""
+}
+
+variable "ssl_certificate_arn" {
+  description = "ARN of the SSL certificate for HTTPS listener"
+  type        = string
+  default     = "arn:aws:acm:eu-west-1:419344669752:certificate/a5bf83b8-e069-4094-9c48-9e5bfb4c5928"
 }

@@ -1,53 +1,24 @@
 module "efs" {
   source = "terraform-aws-modules/efs/aws"
 
-  name           = "test"
-  creation_token = "test-token"
+  name           = "tt-uat-efs"
+  creation_token = "tt-uat-token-v2-single-az"
   encrypted      = true
-  kms_key_arn    = var.kms_key_arn
+  availability_zone_name = "eu-west-1a"
+  performance_mode = "generalPurpose"
+  throughput_mode = "bursting"
   lifecycle_policy = {
     transition_to_ia = "AFTER_30_DAYS"
   }
-  attach_policy                      = true
+  attach_policy                      = false
   bypass_policy_lockout_safety_check = false
-  policy_statements = [
-    {
-      sid     = "Example"
-      actions = [
-        "elasticfilesystem:ClientMount",
-        "elasticfilesystem:DescribeFileSystems"
-        ]
-      resources = [
-        "arn:aws:elasticfilesystem:${var.region}:${var.account_id}:file-system/fs-"
-      ]
-      principals = [
-        {
-          type        = "AWS"
-          identifiers = ["arn:aws:iam::${var.account_id}:role/bitbucket-oidc-role"]
-        }
-      ]
-    }
-  ]
   mount_targets = {
-    "sa-east-1a" = {
+    "eu-west-1a" = {
       subnet_id = var.private_subnets[0]
     }
-    "sa-east-1b" = {
-      subnet_id = var.private_subnets[1]
-    }
-    "sa-east-1c" = {
-      subnet_id = var.private_subnets[2]
-    }
   }
-  security_group_description = "Example EFS security group"
+  security_group_description = "tt-uat-efs security group"
   security_group_vpc_id      = var.vpc_id
-  security_group_rules = {
-    vpc = {
-      # relying on the defaults provdied for EFS/NFS (2049/TCP + ingress)
-      description = "NFS ingress from VPC private subnets"
-      cidr_blocks = var.vpc_cidr
-    }
-  }
 
   # Access point(s)
   access_points = {
@@ -84,9 +55,12 @@ module "efs" {
     region = var.region
   }
 
-  tags = {
-    Name = "shoaib"
-    Terraform   = "true"
-    Environment = "dev"
-  }
+  tags = merge(
+    var.tags,
+    {
+      Name        = "tt-uat-efs"
+      Terraform   = "true"
+      Environment = "uat"
+    }
+  )
 }

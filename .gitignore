@@ -50,3 +50,9 @@ Thumbs.db
 *.mov
 *.wmv
 
+# Terraform output and plan files
+*.txt
+plan*
+apply*
+tfplan*
+

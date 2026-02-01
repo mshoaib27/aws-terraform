@@ -3,7 +3,7 @@
 resource "aws_security_group" "redis_sg" {
   name        = "redis-sg"
   description = "Security group for Redis"
-  vpc_id      = module.vpc.vpc_id
+  vpc_id = var.vpc_id
 
   ingress {
     from_port   = 6379
@@ -16,7 +16,7 @@ resource "aws_security_group" "redis_sg" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["11.1.0.0/0"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = merge(
@@ -30,7 +30,7 @@ resource "aws_security_group" "redis_sg" {
 # ElastiCache Subnet Group
 resource "aws_elasticache_subnet_group" "redis_subnet_group" {
   name       = "redis-subnet-group"
-  subnet_ids = var.private_subnets[0]
+  subnet_ids = var.private_subnets
 
   tags = merge(
     var.tags,
@@ -46,10 +46,11 @@ resource "aws_elasticache_cluster" "redis_cluster" {
   engine               = "redis"
   node_type            = var.node_type
   num_cache_nodes      = var.num_cache_nodes
-  parameter_group_name = "default.redis6.x"
+  parameter_group_name = "default.redis7"
   port                 = 6379
   subnet_group_name    = aws_elasticache_subnet_group.redis_subnet_group.name
   security_group_ids   = [aws_security_group.redis_sg.id]
+  preferred_availability_zones = [ "sa-east-1a" ]
 
   tags = merge(
     var.tags,

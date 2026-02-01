@@ -4,8 +4,9 @@ resource "aws_lb" "this" {
   internal            = var.internal
   load_balancer_type  = "application"
   security_groups     = var.security_groups
-  subnets             = var.subnets
+  subnets = var.public_subnets
   enable_deletion_protection = var.enable_deletion_protection
+  
 
   tags = merge(var.tags, {
     Name = var.alb_name
@@ -18,11 +19,11 @@ resource "aws_lb_listener" "http" {
   port            = 80
   protocol        = "HTTP"
   default_action {
-    type = "fixed-response"
-    fixed_response {
-      content_type = "text/plain"
-      message_body = "Default action"
-      status_code  = "404"
+    type = "redirect"
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
     }
   }
 }
@@ -46,4 +47,27 @@ resource "aws_lb_target_group" "default" {
   tags = merge(var.tags, {
     Name = "${var.alb_name}-tg"
   })
+}
+
+######################### ALB Target Group Registration #########################
+resource "aws_lb_target_group_attachment" "ec2_target" {
+  count            = var.create_alb && var.register_targets ? 1 : 0
+  target_group_arn = aws_lb_target_group.default[0].arn
+  target_id        = var.target_instance_id
+  port             = 80
+}
+
+######################### ALB Listener - HTTPS #########################
+resource "aws_lb_listener" "https" {
+  count             = var.create_alb && var.ssl_certificate_arn != "" ? 1 : 0
+  load_balancer_arn = aws_lb.this[0].arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-TLS-1-2-2017-01"
+  certificate_arn   = var.ssl_certificate_arn
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.default[0].arn
+  }
 }
