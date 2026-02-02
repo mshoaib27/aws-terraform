@@ -1,0 +1,114 @@
+﻿{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "S3BackendAccess",
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket",
+        "s3:GetBucketVersioning",
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::*-terraform-backend",
+        "arn:aws:s3:::*-terraform-backend/*"
+      ]
+    },
+    {
+      "Sid": "DynamoDBStateLocking",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:DescribeTable",
+        "dynamodb:GetItem",
+        "dynamodb:PutItem",
+        "dynamodb:DeleteItem"
+      ],
+      "Resource": "arn:aws:dynamodb:*:*:table/terraform-locks"
+    },
+    {
+      "Sid": "EC2FullAccess",
+      "Effect": "Allow",
+      "Action": ["ec2:*"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "RDSFullAccess",
+      "Effect": "Allow",
+      "Action": ["rds:*"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "EFSFullAccess",
+      "Effect": "Allow",
+      "Action": ["elasticfilesystem:*"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "ELBFullAccess",
+      "Effect": "Allow",
+      "Action": ["elasticloadbalancing:*"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "IAMRoleAndPolicy",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreateRole",
+        "iam:DeleteRole",
+        "iam:GetRole",
+        "iam:PutRolePolicy",
+        "iam:DeleteRolePolicy",
+        "iam:PassRole",
+        "iam:CreateInstanceProfile",
+        "iam:DeleteInstanceProfile",
+        "iam:AddRoleToInstanceProfile",
+        "iam:RemoveRoleFromInstanceProfile"
+      ],
+      "Resource": "arn:aws:iam::*:role/*"
+    },
+    {
+      "Sid": "VPCNetworkAccess",
+      "Effect": "Allow",
+      "Action": ["ec2:*Vpc*", "ec2:*Subnet*", "ec2:*Route*", "ec2:*InternetGateway*", "ec2:*NatGateway*", "ec2:*Address*"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SecurityGroupAccess",
+      "Effect": "Allow",
+      "Action": ["ec2:*SecurityGroup*"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "CloudWatchLogsAndMetrics",
+      "Effect": "Allow",
+      "Action": ["logs:*", "cloudwatch:*"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SNSTopicAccess",
+      "Effect": "Allow",
+      "Action": ["sns:*"],
+      "Resource": "arn:aws:sns:*:*:*"
+    },
+    {
+      "Sid": "LambdaFunctionAccess",
+      "Effect": "Allow",
+      "Action": ["lambda:*"],
+      "Resource": "arn:aws:lambda:*:*:function/*"
+    },
+    {
+      "Sid": "ACMCertificateAccess",
+      "Effect": "Allow",
+      "Action": ["acm:*"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "KMSEncryption",
+      "Effect": "Allow",
+      "Action": ["kms:*"],
+      "Resource": "*"
+    }
+  ]
+}
