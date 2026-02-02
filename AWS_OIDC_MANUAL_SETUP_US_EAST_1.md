@@ -69,6 +69,8 @@ aws iam create-open-id-connect-provider \
 
 This role will be assumed by GitHub Actions.
 
+**Important**: You do NOT need a GitHub organization to create this role. The organization/repository name is only specified in the trust policy conditions (not during role creation). If AWS console asks for an organization, just skip it or leave it blank.
+
 ### Via AWS Console:
 
 1. Go to **IAM**  **Roles**  **Create role**
@@ -474,4 +476,5 @@ aws dynamodb describe-table --table-name terraform-locks
 # Check role policies
 aws iam list-role-policies --role-name github-actions-terraform-role
 ```
+
 
